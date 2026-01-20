@@ -1,0 +1,58 @@
+name: VPN Checker (RU Top-100)
+
+on:
+  schedule:
+    - cron: "0 * * * *"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Install Xray
+        run: |
+          set -euo pipefail
+          sudo apt-get update -y
+          sudo apt-get install -y unzip wget
+          URL="$(wget -qO- https://api.github.com/repos/XTLS/Xray-core/releases/latest | grep browser_download_url | grep linux-64.zip | head -n 1 | cut -d '"' -f 4)"
+          echo "Downloading: $URL"
+          wget -O xray.zip "$URL"
+          unzip -o xray.zip -d xray_dist
+          chmod +x xray_dist/xray
+          ./xray_dist/xray version
+
+      - name: Run checker
+        env:
+          XRAY_PATH: ${{ github.workspace }}/xray_dist/xray
+        run: |
+          python scripts/vpn_checker.py --xray-path "$XRAY_PATH"
+
+      - name: Commit and push if changed
+        run: |
+          set -euo pipefail
+          if git diff --quiet; then
+            echo "No changes."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add ru_top.txt ru_top_base64.txt
+          git commit -m "Update RU top-100 VPN list"
+          git push
+
