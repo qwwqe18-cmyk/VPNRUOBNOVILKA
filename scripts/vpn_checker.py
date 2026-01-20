@@ -18,7 +18,7 @@ import requests
 from dotenv import load_dotenv
 
 
-VLESS_LIST_URL = "https://raw.githubusercontent.com/AvenCores/goida-vpn-configs/refs/heads/main/githubmirror/26.txt"
+VLESS_LIST_URL = "https://gist.githubusercontent.com/qwwqe18-cmyk/86b7e28e5afb5b819947d4b02538a275/raw/27ea8e155f8601ac780967bbaf1e113073b78a78/ru_fast.txt"
 IP_API_URL = "http://ip-api.com/json/"
 IP_API_BATCH_URL = "http://ip-api.com/batch"
 
