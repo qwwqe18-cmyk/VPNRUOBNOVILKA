@@ -29,17 +29,9 @@ jobs:
         run: |
           set -euo pipefail
           sudo apt-get update -y
-          sudo apt-get install -y unzip wget jq
-          # Берём прямую ссылку на asset Xray-linux-64.zip из latest release
-          URL="$(
-            curl -s https://api.github.com/repos/XTLS/Xray-core/releases/latest \
-            | jq -r '.assets[] | select(.name | test("linux-64")) | .browser_download_url' \
-            | head -n 1
-          )"
-          if [ -z "$URL" ] || [[ "$URL" != https://* ]]; then
-            echo "Failed to resolve Xray download URL"
-            exit 1
-          fi
+          sudo apt-get install -y unzip wget
+          # Стабильная ссылка на последний релиз Xray для linux-64
+          URL="https://github.com/XTLS/Xray-core/releases/latest/download/Xray-linux-64.zip"
           echo "Downloading: $URL"
           wget -O xray.zip "$URL"
           unzip -o xray.zip -d xray_dist
@@ -78,3 +70,4 @@ jobs:
           done
           echo "Push failed after retries."
           exit 1
+
