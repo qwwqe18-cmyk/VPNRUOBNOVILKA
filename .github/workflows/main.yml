@@ -63,5 +63,18 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add ru_top.txt ru_top_base64.txt
           git commit -m "Update RU top-100 VPN list"
-          git push
-
+          # В случае параллельных запусков (cron/dispatch) возможен non-fast-forward.
+          # Делаем rebase на актуальный origin/main и повторяем push.
+          git fetch origin main
+          git pull --rebase origin main
+          for i in 1 2 3; do
+            if git push origin HEAD:main; then
+              exit 0
+            fi
+            echo "Push failed (attempt $i). Rebasing and retrying…"
+            git fetch origin main
+            git pull --rebase origin main
+            sleep 2
+          done
+          echo "Push failed after retries."
+          exit 1
